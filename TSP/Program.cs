@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,37 +11,25 @@ namespace TSP
     {
         private static void Main(string[] args)
         {
+            BerlinProblem();
+            //Eil76Problem();
+        }
+
+        public static void BerlinProblem()
+        {
             string Path = "/Users/admin/Desktop/Travelling Salesman Problem/berlin52.txt";
+            List<string[]> citiesList = new List<string[]>();
             
-            
-            //create an initial tour out of nearest neighbors
             var stops = Enumerable.Range(1, 52)
-                                  .Select(i => new Stop(new City(i)))
-                                  //.NearestNeighbors()
-                                  .ToList();
-            int k = 1;
-            using (StreamReader sr = new StreamReader(Path, System.Text.Encoding.Default))
-            {
-                string line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    string[] point = line.Split(" ");
-                    var city = stops.Where(i => i.City.CityName == k);
-                    foreach (var n in city)
-                    {
-                        n.City.X = double.Parse(point[0]);
-                        n.City.Y = double.Parse(point[1]);
-                    }
-                    k++;
-                }
-            }
+                .Select(i => new Stop(new City(i,Path)))
+                .NearestNeighbors()
+                .ToList();
 
             foreach (var stop in stops)
             {
                 Console.WriteLine(stop.City.CityName + " " + stop.City.X + " " + stop.City.Y);
             }
-
-            stops.NearestNeighbors();
+            
             
             //create next pointers between them
             stops.Connect(true);
@@ -53,23 +42,86 @@ namespace TSP
             {
                 Console.WriteLine(startingTour);
                 var newTour = startingTour.GenerateMutations()
-                                          .MinBy(tour => tour.Cost());
+                    .MinBy(tour => tour.Cost());
                 if (newTour.Cost() < startingTour.Cost()) startingTour = newTour;
                 else break;
             }
         }
+        
+        public static void Eil76Problem()
+        {
+            string Path = "/Users/admin/Desktop/Travelling Salesman Problem/eil76.txt";
+            var stops = Enumerable.Range(1, 76)
+                .Select(i => new Stop(new City(i,Path)))
+                .NearestNeighbors()
+                .ToList();
+            // int k = 1;
+            // using (StreamReader sr = new StreamReader(Path, System.Text.Encoding.Default))
+            // {
+            //     string line;
+            //     while ((line = sr.ReadLine()) != null)
+            //     {
+            //         string[] point = line.Split(" ");
+            //         var city = stops.Where(i => i.City.CityName == k);
+            //         foreach (var n in city)
+            //         {
+            //             n.City.X = double.Parse(point[0]);
+            //             n.City.Y = double.Parse(point[1]);
+            //         }
+            //         k++;
+            //     }
+            // }
+
+            foreach (var stop in stops)
+            {
+                Console.WriteLine(stop.City.CityName + " " + stop.City.X + " " + stop.City.Y);
+            }
+            //create next pointers between them
+            stops.Connect(true);
+
+            //wrap in a tour object
+            Tour startingTour = new Tour(stops);
+
+            //the actual algorithm
+            while (true)
+            {
+                Console.WriteLine(startingTour);
+                var newTour = startingTour.GenerateMutations()
+                    .MinBy(tour => tour.Cost());
+                if (newTour.Cost() < startingTour.Cost()) startingTour = newTour;
+                else break;
+            }
+        }
+        
 
 
         private class City
         {
             private static Random rand = new Random();
+            List<string[]> citiesList = new List<string[]>();
+            public static int Pointer = 0;
 
 
-            public City(int cityName)
+
+
+            public City(int cityName, string Path)
             {
-                X = rand.NextDouble() * 100;
-                Y = rand.NextDouble() * 100;
+                using (StreamReader sr = new StreamReader(Path, System.Text.Encoding.Default))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        string[] point = line.Split(" ");
+                        citiesList.Add(point);
+                    }
+                    citiesList.ToArray();
+                }
+                
+                
+                X = Double.Parse(citiesList[Pointer][0]);
+                Y =  Double.Parse(citiesList[Pointer][1]);
                 CityName = cityName;
+                Pointer++;
             }
 
 

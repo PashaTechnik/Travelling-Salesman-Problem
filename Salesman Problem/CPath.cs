@@ -4,16 +4,16 @@ namespace Salesman_Problem
 {
     class CPath
     {
-        //расстояния между городами
+
         double[,] distance;
-        //индексы городов формируют искомый путь
+
         public int[] Path;
 
         public CPath(CCities map)
         {
-            //на вход передаем уже созданные города
+
             distance = new double[map.Coordinate.Length, map.Coordinate.Length];
-            //формируем матрицц расстояний, работать в дальнейшем будем именно с ней
+
             for (int j = 0; j < map.Coordinate.Length; j++)
             {
                 distance[j, j] = 0;

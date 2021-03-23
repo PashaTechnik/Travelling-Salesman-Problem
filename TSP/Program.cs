@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -11,26 +12,35 @@ namespace TSP
     {
         private static void Main(string[] args)
         {
-            BerlinProblem();
-            //Eil76Problem();
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+            //SolveSalesmanProblem("gr96",96);
+            //SolveSalesmanProblem("berlin52",52);
+            //SolveSalesmanProblem("pr76", 76);
+            //SolveSalesmanProblem("eil76", 76);
+            SolveSalesmanProblem("eil101", 101);
+            stopWatch.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan ts = stopWatch.Elapsed;
+
+            // Format and display the TimeSpan value.
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("RunTime " + elapsedTime);
         }
 
-        public static void BerlinProblem()
+        public static void SolveSalesmanProblem(string ProblemName, int N)
         {
-            string Path = "/Users/admin/Desktop/Travelling Salesman Problem/berlin52.txt";
-            List<string[]> citiesList = new List<string[]>();
-            
-            var stops = Enumerable.Range(1, 52)
+            string Path = "/Users/admin/Desktop/Travelling Salesman Problem/" + ProblemName + ".txt";
+            var stops = Enumerable.Range(1, N)
                 .Select(i => new Stop(new City(i,Path)))
                 .NearestNeighbors()
                 .ToList();
-
             foreach (var stop in stops)
             {
                 Console.WriteLine(stop.City.CityName + " " + stop.City.X + " " + stop.City.Y);
             }
-            
-            
             //create next pointers between them
             stops.Connect(true);
 
@@ -48,50 +58,7 @@ namespace TSP
             }
         }
         
-        public static void Eil76Problem()
-        {
-            string Path = "/Users/admin/Desktop/Travelling Salesman Problem/eil76.txt";
-            var stops = Enumerable.Range(1, 76)
-                .Select(i => new Stop(new City(i,Path)))
-                .NearestNeighbors()
-                .ToList();
-            // int k = 1;
-            // using (StreamReader sr = new StreamReader(Path, System.Text.Encoding.Default))
-            // {
-            //     string line;
-            //     while ((line = sr.ReadLine()) != null)
-            //     {
-            //         string[] point = line.Split(" ");
-            //         var city = stops.Where(i => i.City.CityName == k);
-            //         foreach (var n in city)
-            //         {
-            //             n.City.X = double.Parse(point[0]);
-            //             n.City.Y = double.Parse(point[1]);
-            //         }
-            //         k++;
-            //     }
-            // }
-
-            foreach (var stop in stops)
-            {
-                Console.WriteLine(stop.City.CityName + " " + stop.City.X + " " + stop.City.Y);
-            }
-            //create next pointers between them
-            stops.Connect(true);
-
-            //wrap in a tour object
-            Tour startingTour = new Tour(stops);
-
-            //the actual algorithm
-            while (true)
-            {
-                Console.WriteLine(startingTour);
-                var newTour = startingTour.GenerateMutations()
-                    .MinBy(tour => tour.Cost());
-                if (newTour.Cost() < startingTour.Cost()) startingTour = newTour;
-                else break;
-            }
-        }
+        
         
 
 
@@ -273,9 +240,19 @@ namespace TSP
 
             public override string ToString()
             {
+
+                var test = Cycle().Select(stop => stop.ToString()).ToArray();
+
+
+                for (int i = 0; i < test.Length; i++)
+                {
+                    test[i] = (int.Parse(test[i]) - 1).ToString();
+                }
                 string path = String.Join(
-                    "->",
-                    Cycle().Select(stop => stop.ToString()).ToArray());
+                    " ",
+                    test);
+                
+
                 return String.Format("Cost: {0}, Path:{1}", Cost(), path);
             }
 
